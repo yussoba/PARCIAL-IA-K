@@ -25,9 +25,4 @@ public class FSM<T>
     {
         _currentState.OnUpdate();
     }
-
-    public void FixedUpdate()
-    {
-        _currentState.OnFixedUpdate();
-    }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,12 +14,16 @@ public class Hunter : MonoBehaviour
     [SerializeField] float _viewDistance;
     [SerializeField] float _distanceToAttack;
 
-    [SerializeField] Transform _target;
+    private List<Boid> targets = new();
+
     public float Speed => _speed;
+    public float currentEnergy;
+    public float maxEnergy = 5;
     [SerializeField] float _speed;
 
     public float ArriveDistance => _arriveDistance;
     [SerializeField] float _arriveDistance;
+    public Boid currentTarget;
 
 
     void Awake()
@@ -28,11 +33,10 @@ public class Hunter : MonoBehaviour
         _myMaterial = GetComponent<Renderer>().material;
 
         _originalColor = _myMaterial.color;
+        targets.AddRange(FindObjectsOfType<Boid>());
 
-        IState idle = new IdleAgentState(_FSM);
-        _FSM.AddState(AgentStates.Idle, idle);
-
-        //IState patrol = new PatrolAgentState(_FSM, this, _allWaypoints);
+        _FSM.AddState(AgentStates.Chase, new ChaseAgentState(_FSM, this));
+        _FSM.AddState(AgentStates.Idle, new IdleAgentState(_FSM, this));
         _FSM.AddState(AgentStates.Patrol, new PatrolAgentState(_FSM, this, _allWaypoints));
 
         _FSM.ChangeState(AgentStates.Idle);
@@ -45,14 +49,43 @@ public class Hunter : MonoBehaviour
     
     public bool TargetOnSight()
     {
-        return Vector3.Distance(transform.position, _target.position) <= _viewDistance;
+        var minDistance = 0;
+        foreach (var target in targets)
+        {
+            if (Vector3.Distance(transform.position, target.transform.position) <= _viewDistance)
+            {
+                currentTarget = target;
+                return true;
+            }
+        }
+
+        currentTarget = null;
+        return false;
     }
 
     public bool TargetIsClose()
     {
-        return Vector3.Distance(transform.position, _target.position) <= _distanceToAttack;
+        var minDistance = 0;
+        foreach (var target in targets)
+        {
+            if (Vector3.Distance(transform.position, target.transform.position) <= _distanceToAttack)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
-    
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.GetComponent<Boid>())
+        {
+            targets.Remove(collision.gameObject.GetComponent<Boid>());
+            Destroy(collision.gameObject);
+        }
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
@@ -66,9 +99,25 @@ public class Hunter : MonoBehaviour
     {
         _myMaterial.color = newColor;
     }
-
-    public void RestoreColor()
+    
+    public void Movement()
     {
-        _myMaterial.color = _originalColor;
+        if (currentTarget == null)
+            return;
+        
+        var dir = currentTarget.transform.position - transform.position;
+        dir.y = 0;
+        transform.forward = dir;
+        transform.position += transform.forward * Speed * Time.deltaTime;
+    }
+
+    public void UseEnergy()
+    {
+        currentEnergy -= Time.deltaTime;
+    }
+    
+    public void RecoveringEnergy()
+    {
+        currentEnergy += Time.deltaTime;
     }
 }

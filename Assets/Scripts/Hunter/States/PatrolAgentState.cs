@@ -14,8 +14,6 @@ public class PatrolAgentState : IState
 
     float _arriveDistance;
 
-    float _currentEnergy;
-
     FSM<AgentStates> _fsm;
 
     public PatrolAgentState(FSM<AgentStates> fsm, Hunter hunter, Transform[] allWaypoints)
@@ -34,47 +32,49 @@ public class PatrolAgentState : IState
 
     public void OnEnter()
     {
-        _currentEnergy = 0;
-
         _hunter.ChangeColor(Color.yellow);
+        Debug.Log("Patrullo");
     }
 
     public void OnUpdate()
     {
-        _currentEnergy += Time.deltaTime;
+        _hunter.UseEnergy();
+        
+        if (_hunter.currentEnergy < 0)
+        {
+            Debug.Log("Me quede sin energia: " + _hunter.currentEnergy);
+            _fsm.ChangeState(AgentStates.Idle);
+        }
+
+        if (_hunter.TargetOnSight())
+        {
+            _fsm.ChangeState(AgentStates.Chase);
+        }
 
         Movement();
 
-        Debug.Log("Gaste 1 punto de energia, me quedan " + _currentEnergy + " puntos de energia.");
-
-        if (_currentEnergy >= 10)
-        {
-            Debug.Log("Puntos de energia: " + _currentEnergy);
-            _fsm.ChangeState(AgentStates.Idle);
-        }
-    }
-
-    public void OnFixedUpdate()
-    {
-        throw new System.NotImplementedException();
+        Debug.Log("Gaste 1 punto de energia, me quedan " + _hunter.currentEnergy + " puntos de energia.");
     }
 
     public void OnExit()
     {
-        _hunter.RestoreColor();
+        
     }
 
     void Movement()
     {
         Transform nextWaypoint = _allWaypoints[_currentWaypoint];
 
-        Vector3 dir = nextWaypoint.position - _hunter.transform.position;
+        var transform = _hunter.transform;
+        var position = transform.position;
+        Vector3 dir = nextWaypoint.position - position;
 
         dir.y = 0;
 
-        _hunter.transform.forward = dir;
+        transform.forward = dir;
 
-        _hunter.transform.position += _hunter.transform.forward * _hunter.Speed * Time.deltaTime;
+        position += transform.forward * _hunter.Speed * Time.deltaTime;
+        transform.position = position;
 
         if (dir.sqrMagnitude <= _arriveDistance)
         {

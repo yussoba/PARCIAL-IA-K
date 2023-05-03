@@ -19,7 +19,6 @@ public class QuestionNode : Node
     {
         switch(question)
         {
-
             case Questions.SeeTarget:
                 if (hunter.TargetOnSight()) trueNode.Execute(hunter);
                 else falseNode.Execute(hunter);

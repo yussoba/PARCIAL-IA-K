@@ -1,36 +1,36 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ChaseAgentState : IState
 {
-    float _currentEnergy;
-    
-    FSM<AgentStates> _fsm;
-    
+    private FSM<AgentStates> _fsm;
+    private Hunter _hunter;
+
+    public ChaseAgentState(FSM<AgentStates> fsm, Hunter hunter)
+    {
+        _fsm = fsm;
+        _hunter = hunter;
+    }
+
     public void OnEnter()
     {
-        throw new System.NotImplementedException();
+        _hunter.ChangeColor(Color.red);
+        Debug.Log("Empiezo a perseguir target");
     }
 
     public void OnUpdate()
     {
-        //TargetOnSight()
+        _hunter.UseEnergy();
+        _hunter.Movement();
         
-        if (_currentEnergy >= 10)
+        if (_hunter.currentEnergy < 0 || !_hunter.TargetOnSight())
         {
-            Debug.Log("Puntos de energia: " + _currentEnergy);
+            Debug.Log("Puntos de energia: " + _hunter.currentEnergy);
             _fsm.ChangeState(AgentStates.Idle);
-        }
-    }
-
-    public void OnFixedUpdate()
-    {
-        throw new System.NotImplementedException();
+        }  
     }
 
     public void OnExit()
     {
-        throw new System.NotImplementedException();
+        
     }
 }

@@ -5,47 +5,36 @@ using UnityEngine;
 public class IdleAgentState : IState
 {
     FSM<AgentStates> _fsm;
+    private Hunter _hunter;
 
-    float _ticksToPatrol;
-
-    float _timeToRecover = 0;
-
-    public IdleAgentState(FSM<AgentStates> fsm)
+    public IdleAgentState(FSM<AgentStates> fsm, Hunter hunter)
     {
         _fsm = fsm;
+        _hunter = hunter;
     }
 
     public void OnEnter()
     {
-        _timeToRecover = 0;
-
-        Debug.Log("No tengo mas energia, voy a descansar");
+        _hunter.ChangeColor(Color.white);
+        Debug.Log("Idle");
     }
 
     public void OnUpdate()
     {
-        RecoveringEnergy();
-    }
-
-    public void OnFixedUpdate()
-    {
-        throw new System.NotImplementedException();
-    }
-    
-    public void OnExit()
-    {
-        Debug.Log("Recupere toda mi energia, voy a patrullar");
-
-    }
-
-    void RecoveringEnergy()
-    {
-        _timeToRecover += Time.deltaTime;
-
-        if (_timeToRecover >= 10)
+        _hunter.RecoveringEnergy();
+        
+        if (_hunter.TargetOnSight() && _hunter.currentEnergy >= _hunter.maxEnergy)
+        {
+            _fsm.ChangeState(AgentStates.Chase);
+        }
+        
+        if (_hunter.currentEnergy >= _hunter.maxEnergy)
         {
             _fsm.ChangeState(AgentStates.Patrol);
         }
     }
-
+    
+    public void OnExit()
+    {
+    }
 }

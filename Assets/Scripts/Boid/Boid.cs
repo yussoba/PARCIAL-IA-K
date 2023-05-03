@@ -22,8 +22,6 @@ public class Boid : MonoBehaviour
 
     void Start()
     {
-        food = FindClosestFood();
-
         BoidsManager.Instance.RegisterNewBoid(this);
 
         Vector3 random = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f));
@@ -33,6 +31,8 @@ public class Boid : MonoBehaviour
 
     void Update()
     {
+        food = FindClosestFood();
+        
         AddForce(Separation() * BoidsManager.Instance.SeparationWeight +
              Alignment() * BoidsManager.Instance.AlignmentWeight +
              Cohesion() * BoidsManager.Instance.CohesionWeight +
@@ -59,7 +59,7 @@ public class Boid : MonoBehaviour
         foreach (Boid boid in BoidsManager.Instance.AllBoids)
         {
             //Si soy este boid a chequear, ignoro y sigo la iteracion
-            if (boid == this) continue;
+            if (boid == this || boid == null) continue;
 
             //Saco la direccion hacia el boid
             Vector3 dirToBoid = boid.transform.position - transform.position;
@@ -88,7 +88,7 @@ public class Boid : MonoBehaviour
         foreach (Boid boid in BoidsManager.Instance.AllBoids)
         {
             //Si soy este boid a chequear, ignoro y sigo la iteracion
-            if (boid == this) continue;
+            if (boid == this || boid == null) continue;
 
             //Saco la direccion hacia el boid
             Vector3 dirToBoid = boid.transform.position - transform.position;
@@ -122,7 +122,7 @@ public class Boid : MonoBehaviour
         foreach (Boid boid in BoidsManager.Instance.AllBoids)
         {
             //Si soy este boid a chequear, ignoro y sigo la iteracion
-            if (boid == this) continue;
+            if (boid == this || boid == null) continue;
 
             //Saco la direccion hacia el boid
             Vector3 dirToBoid = boid.transform.position - transform.position;
@@ -165,7 +165,7 @@ public class Boid : MonoBehaviour
         if (food != null)
         {
             Vector3 dirToFood = food.transform.position - transform.position;
-            float distance = dirToFood.magnitude;
+            float distance = Vector2.Distance(food.transform.position, transform.position);
 
             if (distance < 1f)
             {
@@ -212,7 +212,10 @@ public class Boid : MonoBehaviour
 
     Vector3 Evade()
     {
-        return -Pursuit();
+        if (Vector3.Distance(transform.position, _pursuitTarget.transform.position) <= BoidsManager.Instance.ViewRadius)
+            return -Pursuit();
+        
+        return Vector3.zero;
     }
 
     Vector3 Seek(Vector3 targetPosition)
