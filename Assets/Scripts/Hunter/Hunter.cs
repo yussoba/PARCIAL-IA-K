@@ -14,9 +14,6 @@ public class Hunter : MonoBehaviour
     [SerializeField] float _distanceToAttack;
 
     [SerializeField] Transform _target;
-
-    [SerializeField] Node _decisionTreeStart;
-
     public float Speed => _speed;
     [SerializeField] float _speed;
 
@@ -40,42 +37,12 @@ public class Hunter : MonoBehaviour
 
         _FSM.ChangeState(AgentStates.Idle);
     }
-    void Start()
-    {
-        
-    }
-
+    
     void Update()
     {
         _FSM.Update();
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            _decisionTreeStart.Execute(this);
-            //GetDecision();
-        }
     }
-
-    public void Rest()
-    {
-        Debug.Log("Decision: Rest");
-    }
-
-    public void Patrol()
-    {
-        Debug.Log("Decision: Patrol");
-    }
-
-    public void Chase()
-    {
-        Debug.Log("Decision: Chase");
-    }
-
-    public void Attack()
-    {
-        Debug.Log("Decision: Attack");
-    }
-
+    
     public bool TargetOnSight()
     {
         return Vector3.Distance(transform.position, _target.position) <= _viewDistance;
@@ -85,35 +52,7 @@ public class Hunter : MonoBehaviour
     {
         return Vector3.Distance(transform.position, _target.position) <= _distanceToAttack;
     }
-
-    /*void GetDecision()
-    {
-        if (_life > 10)
-        {
-            float distance = Vector3.Distance(transform.position, _target.position);
-
-            if (TargetOnSight())
-            {
-                if (TargetIsClose())
-                {
-                    Attack();
-                }
-                else
-                {
-                    Chase();
-                }
-            }
-            else
-            {
-                Patrol();
-            }
-        }
-        else
-        {
-            Rest();
-        }
-    }*/
-
+    
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
@@ -132,5 +71,4 @@ public class Hunter : MonoBehaviour
     {
         _myMaterial.color = _originalColor;
     }
-
 }

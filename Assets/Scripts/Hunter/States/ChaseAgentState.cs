@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class ChaseAgentState : IState
 {
+    float _currentEnergy;
+    
+    FSM<AgentStates> _fsm;
+    
     public void OnEnter()
     {
         throw new System.NotImplementedException();
@@ -11,7 +15,7 @@ public class ChaseAgentState : IState
 
     public void OnUpdate()
     {
-        
+        //TargetOnSight()
         
         if (_currentEnergy >= 10)
         {

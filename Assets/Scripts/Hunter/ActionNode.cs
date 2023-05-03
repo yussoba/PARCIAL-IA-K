@@ -16,7 +16,7 @@ public class ActionNode : Node
 
     public override void Execute(Hunter hunter)
     {
-        switch (_actionSelected)
+        /*switch (_actionSelected)
         {   
             case Actions.Rest:
                 hunter.Rest();
@@ -33,7 +33,7 @@ public class ActionNode : Node
             case Actions.Attack:
                 hunter.Attack();
                 break;
-        }
+        }*/
     }
 }
 
